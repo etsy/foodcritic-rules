@@ -52,7 +52,7 @@ rule "ETSY004", "Execute resource defined without conditional or action :nothing
 end
 
 rule "ETSY005", "Action :restart sent to a core service" do
-  tags %w{correctness recipe etsy}
+  tags %w{style recipe etsy}
   recipe do |ast, filename|
     ast.xpath('//command[ident/@value = "notifies"]/args_add_block[descendant::symbol/ident/@value="restart"]/descendant::method_add_arg[fcall/ident/@value="resources"]/descendant::assoc_new[symbol/ident/@value="service"]/descendant::tstring_content').select{|notifies| @coreservices.include?(notifies.attribute('value').to_s)}
   end
