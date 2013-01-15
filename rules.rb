@@ -63,7 +63,7 @@ rule "ETSY006", "Execute resource used to run chef-provided command" do
   recipe do |ast|
     find_resources(ast, :type => 'execute').find_all do |cmd|
       cmd_str = (resource_attribute(cmd, 'command') || resource_name(cmd)).to_s
-      @corecommands.any? { |cmd| cmd_str.include? cmd }
+      @corecommands.any? { |corecommand| cmd_str.include? corecommand }
     end.map{|c| match(c)}
   end
 end
