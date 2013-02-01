@@ -44,8 +44,11 @@ rule "ETSY004", "Execute resource defined without conditional or action :nothing
   tags %w{style recipe etsy}
   recipe do |ast,filename|
     pres = find_resources(ast, :type => 'execute').find_all do |cmd|
+      puts resource_name(cmd).to_s
       cmd_actions = (resource_attribute(cmd, 'action') || resource_name(cmd)).to_s
       condition = cmd.xpath('//ident[@value="only_if" or @value="not_if" or @value="creates"][parent::fcall or parent::command or ancestor::if]')
+      puts condition.empty?
+      puts cmd_actions.include?("nothing")
       (condition.empty? && !cmd_actions.include?("nothing"))
     end.map{|cmd| match(cmd)}
   end
@@ -54,7 +57,12 @@ end
 rule "ETSY005", "Action :restart sent to a core service" do
   tags %w{style recipe etsy}
   recipe do |ast, filename|
-    ast.xpath('//command[ident/@value = "notifies"]/args_add_block[descendant::symbol/ident/@value="restart"]/descendant::method_add_arg[fcall/ident/@value="resources"]/descendant::assoc_new[symbol/ident/@value="service"]/descendant::tstring_content').select{|notifies| @coreservices.include?(notifies.attribute('value').to_s)}
+    find_resources(ast).select do |resource|
+      notifications(resource).any? do |notification|
+        @coreservices.include?(notification[:resource_name]) and
+          notification[:action] == :restart
+      end
+    end
   end
 end
 
@@ -68,16 +76,19 @@ rule "ETSY006", "Execute resource used to run chef-provided command" do
   end
 end
 
+
 rule "ETSY007", "Package or yum_package resource used to install core package without specific version number" do
   tags %w{style recipe etsy}
   recipe do |ast,filename|
     pres = find_resources(ast, :type => 'package').find_all do |cmd|
       cmd_str = (resource_attribute(cmd, 'version') || resource_name(cmd)).to_s
-      cmd_str == resource_name(cmd) && @coreservicepackages.any? { |svc| resource_name(cmd).include? svc }
+      cmd_action = (resource_attribute(cmd, 'action') || resource_name(cmd)).to_s
+      cmd_str == resource_name(cmd) && @coreservicepackages.any? { |svc| resource_name(cmd) == svc } && cmd_action.include?('install') 
     end
     ypres = find_resources(ast, :type => 'yum_package').find_all do |cmd|
       cmd_str = (resource_attribute(cmd, 'version') || resource_name(cmd)).to_s
-      cmd_str == resource_name(cmd) && @coreservicepackages.any? { |svc| resource_name(cmd).include? svc }
+      cmd_action = (resource_attribute(cmd, 'action') || resource_name(cmd)).to_s
+      cmd_str == resource_name(cmd) && @coreservicepackages.any? { |svc| resource_name(cmd) == svc } && cmd_action.include?('install') 
     end
     pres.concat(ypres).map{|cmd| match(cmd)}
   end
