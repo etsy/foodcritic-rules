@@ -18,25 +18,7 @@ rule "ETSY001", "Package or yum_package resource used with :upgrade action" do
   end
 end
 
-rule "ETSY002", "Execute resource used to run git commands" do
-  tags %w{style recipe etsy}
-  recipe do |ast|
-    pres = find_resources(ast, :type => 'execute').find_all do |cmd|
-      cmd_str = (resource_attribute(cmd, 'command') || resource_name(cmd)).to_s
-      cmd_str.include?('git ')
-    end.map{|cmd| match(cmd)}
-  end
-end
-
-rule "ETSY003", "Execute resource used to run curl or wget commands" do
-  tags %w{style recipe etsy}
-  recipe do |ast|
-    pres = find_resources(ast, :type => 'execute').find_all do |cmd|
-      cmd_str = (resource_attribute(cmd, 'command') || resource_name(cmd)).to_s
-      (cmd_str.include?('curl ') || cmd_str.include?('wget  '))
-    end.map{|cmd| match(cmd)}
-  end
-end
+#ETSY002 and ETSY003 removed as they were added to mainline foodcritic as FC040 and FC041
 
 # This rule does not detect execute resources defined inside a conditional, as foodcritic rule FC023 (Prefer conditional attributes)
 # already provides this. It's recommended to use both rules in conjunction. (foodcritic -t etsy,FC023)
@@ -44,11 +26,8 @@ rule "ETSY004", "Execute resource defined without conditional or action :nothing
   tags %w{style recipe etsy}
   recipe do |ast,filename|
     pres = find_resources(ast, :type => 'execute').find_all do |cmd|
-      puts resource_name(cmd).to_s
       cmd_actions = (resource_attribute(cmd, 'action') || resource_name(cmd)).to_s
       condition = cmd.xpath('//ident[@value="only_if" or @value="not_if" or @value="creates"][parent::fcall or parent::command or ancestor::if]')
-      puts condition.empty?
-      puts cmd_actions.include?("nothing")
       (condition.empty? && !cmd_actions.include?("nothing"))
     end.map{|cmd| match(cmd)}
   end
