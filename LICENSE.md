@@ -1,4 +1,4 @@
-Oculus
+Etsy Foodcritic Rules
 ----------
 * Author:: Jon Cowie (<jcowie@etsy.com>)
 * Copyright:: Copyright (c) 2013 Jon Cowie
