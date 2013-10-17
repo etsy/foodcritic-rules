@@ -62,12 +62,12 @@ rule "ETSY007", "Package or yum_package resource used to install core package wi
     pres = find_resources(ast, :type => 'package').find_all do |cmd|
       cmd_str = (resource_attribute(cmd, 'version') || resource_name(cmd)).to_s
       cmd_action = (resource_attribute(cmd, 'action') || resource_name(cmd)).to_s
-      cmd_str == resource_name(cmd) && @coreservicepackages.any? { |svc| resource_name(cmd) == svc } && cmd_action.include?('install') 
+      cmd_str == resource_name(cmd) && @coreservicepackages.any? { |svc| resource_name(cmd) == svc } && cmd_action.include?('install')
     end
     ypres = find_resources(ast, :type => 'yum_package').find_all do |cmd|
       cmd_str = (resource_attribute(cmd, 'version') || resource_name(cmd)).to_s
       cmd_action = (resource_attribute(cmd, 'action') || resource_name(cmd)).to_s
-      cmd_str == resource_name(cmd) && @coreservicepackages.any? { |svc| resource_name(cmd) == svc } && cmd_action.include?('install') 
+      cmd_str == resource_name(cmd) && @coreservicepackages.any? { |svc| resource_name(cmd) == svc } && cmd_action.include?('install')
     end
     pres.concat(ypres).map{|cmd| match(cmd)}
   end
