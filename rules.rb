@@ -27,7 +27,7 @@ rule "ETSY004", "Execute resource defined without conditional or action :nothing
   recipe do |ast,filename|
     pres = find_resources(ast, :type => 'execute').find_all do |cmd|
       cmd_actions = (resource_attribute(cmd, 'action') || resource_name(cmd)).to_s
-      condition = cmd.xpath('//ident[@value="only_if" or @value="not_if" or @value="creates"][parent::fcall or parent::command or ancestor::if]')
+      condition = Nokogiri::XML(cmd.to_xml).xpath('//ident[@value="only_if" or @value="not_if" or @value="creates"][parent::fcall or parent::command or ancestor::if]')
       (condition.empty? && !cmd_actions.include?("nothing"))
     end.map{|cmd| match(cmd)}
   end
