@@ -2,8 +2,9 @@
 @coreservices = ["httpd", "mysql", "memcached", "postgresql-server"]
 @coreservicepackages = ["httpd", "Percona-Server-server-51", "memcached", "postgresql-server"]
 @corecommands = ["yum -y", "yum install", "yum reinstall", "yum remove", "mkdir", "useradd", "usermod", "touch"]
+@pkgupgrade_whitelist = []
 
-rule "ETSY001", "Package or yum_package resource used with :upgrade action" do
+rule "ETSY001", "Package or yum_package resource used with :upgrade action on non-whitelisted package" do
   tags %w{correctness recipe etsy}
   recipe do |ast|
     pres = find_resources(ast, :type => 'package').find_all do |cmd|
