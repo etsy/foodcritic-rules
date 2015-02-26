@@ -8,14 +8,16 @@ rule "ETSY001", "Package or yum_package resource used with :upgrade action on no
   tags %w{correctness recipe etsy}
   recipe do |ast|
     pres = find_resources(ast, :type => 'package').find_all do |cmd|
-      cmd_str = (resource_attribute(cmd, 'action') || resource_name(cmd)).to_s
-      cmd_str.include?('upgrade')
+      cmd_action = resource_attribute(cmd, 'action').to_s
+      cmd_name = (resource_attribute(cmd, 'package_name') || resource_name(cmd)).to_s
+      cmd_action.include?('upgrade') && !@pkgupgrade_whitelist.include?(cmd_name)
     end
     ypres = find_resources(ast, :type => 'yum_package').find_all do |cmd|
-      cmd_str = (resource_attribute(cmd, 'action') || resource_name(cmd)).to_s
-      cmd_str.include?('upgrade')
+      cmd_action = resource_attribute(cmd, 'action').to_s
+      cmd_name = (resource_attribute(cmd, 'package_name') || resource_name(cmd)).to_s
+      cmd_action.include?('upgrade') && !@pkgupgrade_whitelist.include?(cmd_name)
     end
-  pres.concat(ypres).map{|cmd| match(cmd)}
+    pres.concat(ypres).map{|cmd| match(cmd)}
   end
 end
 
